@@ -300,7 +300,7 @@ class Plotter:
         if xaxis:
             return max([max(x.data[xaxis]) for x in csv_list])
         else:
-            return max([x.numrows for x in csv_list])
+            return max([x.numrows-1 for x in csv_list])  # Subtract 1 because x axis starts from 0.
 
     @staticmethod
     def get_y_min(csv_list, xaxis):

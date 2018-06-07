@@ -1,4 +1,4 @@
-[PREREQUISITES]
+### PREREQUISITES
 
 In order to use this program, we need to install Plotly.
 1. sudo apt install python3-pip
@@ -8,7 +8,7 @@ Now, you can invoke the program. To see a list of options, try:
 python3 runme.py -h
 
 
-[EXAMPLE COMMANDS]
+### EXAMPLE COMMANDS
 
 Below are example commands (more complex).
 
@@ -32,8 +32,7 @@ python3 runme.py -d *ospm* -c temperature -t Temperature -y Temperature -p TEMP 
    Plot Avg Freq of core0+core1 and core2+core3 on same html plot with defined titles.
 python3 runme.py -f "*ospm*/*drupal*" -c core-0,core-1;core-2,core-3 --avg -t "Average Core Frequencies" -y Frequency -p FREQ
 
-
-[HTML PLOT CAPABILITIES]
+### HTML PLOT CAPABILITIES
 
 These are various useful functions you can do in the generated HTML plots.
 
