@@ -1,0 +1,7 @@
+.idea/
+*.csv
+CPU2017*
+__pycache__/
+fb*
+plots/
+venv/
