@@ -1,7 +1,5 @@
-README.txt
-
-
 [PREREQUISITES]
+
 In order to use this program, we need to install Plotly.
 1. sudo apt install python3-pip
 2. sudo pip3 install plotly
@@ -11,6 +9,7 @@ python3 runme.py -h
 
 
 [EXAMPLE COMMANDS]
+
 Below are example commands (more complex).
 
 1. For each file in directory whose name contains "auto":
@@ -35,6 +34,7 @@ python3 runme.py -f "*ospm*/*drupal*" -c core-0,core-1;core-2,core-3 --avg -t "A
 
 
 [HTML PLOT CAPABILITIES]
+
 These are various useful functions you can do in the generated HTML plots.
 
 1. HIDE ALL LINES EXCEPT ONE
