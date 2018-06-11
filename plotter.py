@@ -1,5 +1,6 @@
 import os
 import math
+import json
 import random
 import plotly
 import plotly.exceptions
@@ -76,7 +77,7 @@ class Plotter:
         filename = "{}{}".format(self.arg['prefix'], self.arg['name']) if self.arg['prefix'] else self.arg['name']
         file_path = os.path.join(self.arg['out_dir'], filename)
         if self.arg['img']:
-            logged_in = self.login_to_plotly('***REMOVED***', '***REMOVED***')
+            logged_in = self.login_to_plotly('config.json')
             if not logged_in:
                 return
             print("Generating PNG plot...", end='')
@@ -87,8 +88,12 @@ class Plotter:
             plotly.offline.plot(plot_fig, filename=file_path, auto_open=False)
             print("done.\n\nSee {}/{}.".format(self.arg['out_dir'], filename))
 
-    def login_to_plotly(self, username, password):
+    def login_to_plotly(self, config_file):
         try:
+            with open(config_file) as json_data_file:
+                data = json.load(json_data_file)
+                username = data['plotly']['username']
+                password = data['plotly']['password']
             print("Logging into Plotly account to export as image...", end='')
             if username and password:
                 plotly.plotly.sign_in(username, password)
@@ -97,6 +102,10 @@ class Plotter:
             else:
                 print("\nYou need to specify a Plotly username and password to export images.\nAborting.")
                 return False
+        except FileNotFoundError:
+            print("config.json does not exist - please rename config.json.dist to config.json and add your Plotly "
+                  "account credentials. Aborting.")
+            return False
         except plotly.exceptions.PlotlyError:
             print("login failed.\nTo export as image, internet connection and valid account are required.\nAborting.")
             return False
