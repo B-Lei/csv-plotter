@@ -1,14 +1,12 @@
 # csv-plotter
 ## Prerequisites
 
-This program is intended to be used as a command line tool.  
-First, we need to install Plotly.
+This program is intended to be used as a command line tool. First, we need to install Plotly.
 ```
 sudo apt install python3-pip
 sudo pip3 install plotly
 ```
-Now, let's get plotting!  
-To see a list of options, try the following:
+Now, let's get plotting! To see a list of options, try the following:
 ```
 python3 runme.py -h
 ```
