@@ -1,7 +1,10 @@
 config.json
 plots/
-*.csv
-example*
+!example_csv_files
+example_csv_files/*
+!example_csv_files/my_examples
+
+# Ignore Pycharm files
 .idea/
 __pycache__/
 venv/
