@@ -1,8 +1,7 @@
 config.json
-.idea/
-*.csv
-CPU2017*
-__pycache__/
-fb*
 plots/
+*.csv
+example*
+.idea/
+__pycache__/
 venv/

@@ -13,7 +13,7 @@ class Plotter:
     """
     def __init__(self, csv_list, args, xmin=None, xmax=None, ymin=None, ymax=None):
         self.csv_list = csv_list
-        self.common_name = self.get_longest_common_name(self.csv_list)  # Get common dirname/filenames
+        self.common_name = self.get_longest_common_name(self.csv_list)
         # NOTE: Max rows are required to be passed if generating individual files.
         self.arg = self.process_args(self.csv_list, args, xmin, xmax, ymin, ymax)
         self.print_args()
@@ -30,7 +30,7 @@ class Plotter:
         # Set output names. If --indiv is used, ignore --name.
         arg['out_dir'], arg['prefix'] = args.out_dir, "{}_".format(args.prefix) if args.prefix else None
         if arg['data'] is args.dir:
-            default_name = "_".join(os.path.split(os.path.basename(os.path.dirname(csv_list[0].fname))))
+            default_name = os.path.basename(os.path.dirname(csv_list[0].fname))
         else:
             if len(csv_list) > 1:
                 default_name = "_VS_".join([os.path.splitext(os.path.basename(x.fname))[0] for x in csv_list])
@@ -88,7 +88,8 @@ class Plotter:
             plotly.offline.plot(plot_fig, filename=file_path, auto_open=False)
             print("done.\n\nSee {}/{}.".format(self.arg['out_dir'], filename))
 
-    def login_to_plotly(self, config_file):
+    @staticmethod
+    def login_to_plotly(config_file):
         try:
             with open(config_file) as json_data_file:
                 data = json.load(json_data_file)
@@ -184,7 +185,8 @@ class Plotter:
         )
         return self.return_trace(trace_type, trace_info, trace_color, line_style='dot', bar_opacity=0.5)
 
-    def return_trace(self, trace_type, trace_info, trace_color, line_fill=None, line_style=None, bar_opacity=1.0):
+    @staticmethod
+    def return_trace(trace_type, trace_info, trace_color, line_fill=None, line_style=None, bar_opacity=1.0):
         """
         Return and modify the trace info based on trace type.
         """
@@ -209,51 +211,20 @@ class Plotter:
         if cur_max_x == self.arg['xmax']:
             return extension_x, extension_y
         cur_max_y = self.arg['scale'] * values[-1] + self.arg['offset']
-        if not self.is_integer(cur_max_x) and trace_type is not 'bar':  # Range doesn't support floats, so account for first val if float
+        # Range doesn't support floats, so account for first val if float
+        if not self.is_integer(cur_max_x) and trace_type is not 'bar':
             extension_x.append(cur_max_x)
         start_point = int(math.ceil(cur_max_x))
         extension_x += list(range(start_point, int(math.floor(self.arg['xmax']))))
-        extension_x.append(int(math.floor(self.arg['xmax'])))  # Range doesn't include last int value
-        if not self.is_integer(self.arg['xmax']):  # Account for last val if float
+        # Range doesn't include last int value
+        extension_x.append(int(math.floor(self.arg['xmax'])))
+        # Account for last val if float
+        if not self.is_integer(self.arg['xmax']):
             extension_x.append(self.arg['xmax'])
         extension_y = [cur_max_y] * len(extension_x)
         return extension_x, extension_y
 
     def create_plot_layout(self, title, x_title, y_title):
-        # Experimental feature
-        updatemenus = list([
-            dict(
-                buttons=list([
-                    dict(
-                        args=[{'type':'line', 'fill':None, 'visible':[True]*int(math.ceil(self.arg['xmax']))}],
-                        label='Line',
-                        method='restyle'
-                    ),
-                    dict(
-                        args=[{'type': 'line', 'fill': 'tozeroy', 'visible':[True]*int(math.ceil(self.arg['xmax']))}],
-                        label='Filled Line',
-                        method='restyle'
-                    ),
-                    dict(
-                        args=[{'type': 'bar', 'visible':[True]*int(math.ceil(self.arg['xmax']))}],
-                        label='Bar',
-                        method='restyle'
-                    ),
-                    dict(
-                        args=[{'visible':[False]*int(math.ceil(self.arg['xmax']))}],
-                        label='Hide All',
-                        method='restyle'
-                    )
-                ]),
-                direction='down',
-                pad={'r': 10, 't': 10},
-                showactive=True,
-                x=0.1,
-                xanchor='left',
-                y=1.1,
-                yanchor='top'
-            ),
-        ])
         return go.Layout(
             title=title,
             xaxis=dict(title=x_title, range=[self.arg['xmin'], self.arg['xmax']], showline=True, showspikes=True),
@@ -261,35 +232,7 @@ class Plotter:
             legend=dict(font=dict(size="10"), tracegroupgap=0),
             showlegend=True,
             hovermode='closest',
-            # updatemenus=updatemenus
-            # annotations=self.create_plot_annotations()
         )
-
-    # TODO: Fix annotations
-    def create_plot_annotations(self):
-        """
-        Creates annotations for min and max values.
-        """
-        min_val = min(self.y_vals)
-        max_val = max(self.y_vals)
-        return [
-            dict(
-                x=self.y_vals.index(min(self.y_vals)),
-                y=min_val,
-                xref='x', yref='y',
-                text='Lowest value:<br>' + str(min_val),
-                ax=0, ay=-40,
-                yshift=5
-            ),
-            dict(
-                x=self.y_vals.index(max(self.y_vals)),
-                y=max_val,
-                xref='x', yref='y',
-                text='Highest value:<br>' + str(max_val),
-                ax=0, ay=-40,
-                yshift=5
-            ),
-        ]
 
     def print_args(self):
         print("===== ARGS =====")
@@ -372,30 +315,16 @@ class Plotter:
         return r, g, b
 
     @staticmethod
-    def color_str(color_tuple, mod=0):
+    def color_str(col_tup, mod=0):
         """
-        Returns an rgb tuple as a string. Shift color using a modifier value.
-        Lightens a bit because base color is pretty dark.
+        Returns a color tuple (rgb) as a string. Optionally shift colors using a modifier value.
+        If modifier value is used, lighten color a bit because base color is pretty dark.
         """
-        def sub(val, m):  # RGB value must be 0 or greater
+        def sub(val, m):
             return max(0, val-m)
-
-        def add(val, m):  # RGB value must be 255 or less
-            return min(255, val+mod)
-
-        # SCHEME 1: Nicest colors but not visible
-        # mod = mod * 50
-        # r, g, b = color_tuple[0], add(color_tuple[1], mod), add(color_tuple[2], mod/2)
-
-        # SCHEME 2: It's okay...
-        # mod = mod * 100
-        # lighten = 150 if mod != 0 else 0
-        # r, g, b = sub(color_tuple[0]+lighten, mod), sub(color_tuple[1]+lighten, mod), sub(color_tuple[2]+lighten, mod)
-
-        # SCHEME 3: Pretty visible, colors aren't nice though
         mod = mod * 100
         lighten = 150 if mod != 0 else 0
-        r, g, b = sub(color_tuple[0]+lighten, mod), sub(color_tuple[1]+lighten, mod/2), sub(color_tuple[2]+lighten, mod/4)
+        r, g, b = sub(col_tup[0] + lighten, mod), sub(col_tup[1] + lighten, mod / 2), sub(col_tup[2] + lighten, mod / 4)
         return 'rgb({}, {}, {})'.format(r, g, b)
 
     @staticmethod

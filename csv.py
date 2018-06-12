@@ -12,7 +12,8 @@ class CSV:
     def __init__(self, fname, args):
         self.fname = fname
         self.data = self.parse_csv(fname, args.cols, args.xaxis)
-        self.numrows = len(next(iter(self.data.values())))  # Get the number of rows for first arbitrary value
+        # Get the number of rows for first arbitrary value
+        self.numrows = len(next(iter(self.data.values())))
         self.handle_col_ops(args)
 
     def parse_csv(self, fname, cols, xaxis):
@@ -20,8 +21,8 @@ class CSV:
         Parses relevant and unique columns into data structure. Does NOT account for column operations.
         EXAMPLE: In "-c core.* --sum," this would store all cols beginning with "core," NOT a single col of their sum.
         """
-        def valid_row(split_row):  # Ensure not a comment or empty
-            return not split_row[0].startswith('#') and split_row[0]
+        def valid_row(split_row):
+            return split_row[0] and not split_row[0].startswith('#')
         if not os.path.exists(fname) or not os.path.isfile(fname):
             print("{} does not exist or is not a file. Aborting.".format(fname))
             sys.exit(0)
@@ -69,7 +70,8 @@ class CSV:
                 print("\"{}\" not found in CSV headers. Aborting.".format(field))
                 sys.exit(0)
             fields_to_use += matching_fields
-        return sorted(list(set(fields_to_use)))  # Make sure no duplicate entries, and in order for idempotency
+        # Make sure no duplicate entries, and in order for idempotency
+        return sorted(list(set(fields_to_use)))
 
     def handle_col_ops(self, args):
         """

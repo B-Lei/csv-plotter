@@ -18,7 +18,8 @@ def parse_arg_dirfile_list(dirfile_list):
             print("{} was not found. Please make certain that this is an existing file. Aborting.".format(dirfile))
             sys.exit(0)
         dirfiles += found_files
-    return sorted(list(set(dirfiles)))  # Make sure no duplicate entries, and in order for idempotency
+    # Make sure no duplicate entries, and in order for idempotency
+    return sorted(list(set(dirfiles)))
 
 
 def get_arguments():
