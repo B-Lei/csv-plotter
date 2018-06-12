@@ -11,7 +11,7 @@ class Plotter:
     """
     Converts a CSV list into plottable data.
     """
-    def __init__(self, csv_list, args, xmin=None, xmax=None, ymin=None, ymax=None):
+    def __init__(self, args, csv_list, xmin=None, xmax=None, ymin=None, ymax=None):
         self.csv_list = csv_list
         self.common_name = self.get_longest_common_name(self.csv_list)
         # NOTE: Max rows are required to be passed if generating individual files.

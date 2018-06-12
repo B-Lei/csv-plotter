@@ -6,6 +6,24 @@ from src import CSV
 from src import Plotter
 
 
+def get_csv_list(args):
+    csv_list = []
+    if args.dir:
+        for directory in parse_arg_dirfile_list(args.dir):
+            for fname in os.listdir(directory):
+                if fname.endswith(".csv"):
+                    csv_list.append(CSV(os.path.join(directory, fname), args))
+    else:
+        for fname in parse_arg_dirfile_list(args.file):
+            if fname.endswith(".csv"):
+                csv_list.append(CSV(fname, args))
+    if len(csv_list) == 0:
+        print("CSV list is empty. Are you passing a valid directory with \"-d\" flag, or file with \"-f\" flag?")
+        print("\nAborting.")
+        return
+    return csv_list
+
+
 def parse_arg_dirfile_list(dirfile_list):
     """
     Looks at either "--dir" or "--file" and determines what to use.
@@ -22,7 +40,7 @@ def parse_arg_dirfile_list(dirfile_list):
     return sorted(list(set(dirfiles)))
 
 
-def get_arguments():
+def get_arguments(args):
     """
     Set up all options here.
     """
@@ -64,43 +82,34 @@ def get_arguments():
     parser.add_argument("--ymin", help="minimum y-value to use in plot.")
     parser.add_argument("--ymax", help="maximum y-value to use in plot.")
     parser.add_argument("--xaxis", help="col to use as x-axis.")
-    return parser.parse_args()
+    return parser.parse_args(args)
+
+
+def generate_individual_plots(args, csv_list):
+    args.dir = None
+    xaxis = args.xaxis if args.xaxis else None
+    xmin = Plotter.get_x_min(csv_list, xaxis)
+    xmax = Plotter.get_x_max(csv_list, xaxis)
+    ymin = Plotter.get_y_min(csv_list, xaxis) + args.offset
+    ymax = Plotter.get_y_max(csv_list, xaxis) + args.offset
+    for csv in csv_list:
+        args.file = csv.fname
+        plot = Plotter(args, [csv], xmin, xmax, ymin, ymax)
+        plot.generate_plot()
 
 
 def main():
     # STEP 1: Parse args
-    args = get_arguments()
+    args = get_arguments(sys.argv[1:])
 
     # STEP 2: Get a list of CSV objects.
-    csv_list = []
-    if args.dir:
-        for directory in parse_arg_dirfile_list(args.dir):
-            for fname in os.listdir(directory):
-                if fname.endswith(".csv"):
-                    csv_list.append(CSV(os.path.join(directory, fname), args))
-    else:
-        for fname in parse_arg_dirfile_list(args.file):
-            if fname.endswith(".csv"):
-                csv_list.append(CSV(fname, args))
-    if len(csv_list) == 0:
-        print("CSV list is empty. Are you passing a valid directory with \"-d\" flag, or file with \"-f\" flag?")
-        print("\nAborting.")
-        return
+    csv_list = get_csv_list(args)
 
     # STEP 3: Create a Plotter and generate plot(s)
     if args.indiv:
-        args.dir = None
-        xaxis = args.xaxis if args.xaxis else None
-        xmin = Plotter.get_x_min(csv_list, xaxis)
-        xmax = Plotter.get_x_max(csv_list, xaxis)
-        ymin = Plotter.get_y_min(csv_list, xaxis) + args.offset
-        ymax = Plotter.get_y_max(csv_list, xaxis) + args.offset
-        for csv in csv_list:
-            args.file = csv.fname
-            plot = Plotter([csv], args, xmin, xmax, ymin, ymax)
-            plot.generate_plot()
+        generate_individual_plots(args, csv_list)
     else:
-        plot = Plotter(csv_list, args)
+        plot = Plotter(args, csv_list)
         plot.generate_plot()
 
 
