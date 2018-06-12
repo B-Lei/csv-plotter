@@ -77,7 +77,7 @@ class Plotter:
         filename = "{}{}".format(self.arg['prefix'], self.arg['name']) if self.arg['prefix'] else self.arg['name']
         file_path = os.path.join(self.arg['out_dir'], filename)
         if self.arg['img']:
-            logged_in = self.login_to_plotly('config.json')
+            logged_in = self.login_to_plotly('config/config.json')
             if not logged_in:
                 return
             print("Generating PNG plot...", end='')

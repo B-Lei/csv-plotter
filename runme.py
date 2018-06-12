@@ -2,8 +2,8 @@ import os
 import sys
 import glob
 import argparse
-from csv import CSV
-from plotter import Plotter
+from src import CSV
+from src import Plotter
 
 
 def parse_arg_dirfile_list(dirfile_list):
