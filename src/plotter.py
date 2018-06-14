@@ -161,9 +161,15 @@ class Plotter:
         csv_it and trace_it are integers used to determine legend grouping (to group with extension lines).
         csv and "values" are the current csv and its data values for a field (e.g. "temperature").
         """
+        x_vals = csv.data[self.arg['xaxis']] if self.arg['xaxis'] else list(range(0, csv.numrows))
+        y_vals = [self.arg['scale']*y + self.arg['offset'] for y in values]
+        # If max number of x-values is 20 or less, also show an ASCII bar graph in console.
+        if self.arg['xmax'] <= 20:
+            print("\nTrace:", trace_name)
+            print(self.get_histogram(20, y_vals, [str(x) for x in x_vals]))
         trace_info = dict(
-            x=csv.data[self.arg['xaxis']] if self.arg['xaxis'] else list(range(0, csv.numrows)),
-            y=[self.arg['scale']*y + self.arg['offset'] for y in values],
+            x=x_vals,
+            y=y_vals,
             name=trace_name,
             legendgroup='group{}-{}'.format(csv_it, trace_it),
             text='{}{}'.format(os.path.basename(csv.fname), trace_description),
@@ -233,6 +239,53 @@ class Plotter:
             showlegend=True,
             hovermode='closest',
         )
+
+    @staticmethod
+    def get_histogram(precision, test_values, xticks):
+        """
+        Returns a text histogram given precision (# of yticks), list of distribution values, and list of xtick names.
+        This can also be used to plot bars.
+        """
+        xtick_len = len(max(xticks, key=len)) + 2  # Round xticks up to nearest odd int
+        if xtick_len % 2 == 0:
+            xtick_len += 1
+        bar_padding = " " * int(xtick_len / 2)
+
+        def form_line(percentage):
+            tick_line = ""
+            for value in test_values:
+                if percentage != 0 and value >= percentage:
+                    tick_line += "{0}#{0}".format(bar_padding)
+                elif percentage == 0 and value > percentage:
+                    tick_line += "{0}#{0}".format(bar_padding)
+                else:
+                    tick_line += "{0} {0}".format(bar_padding)
+            return tick_line
+
+        lines = []
+        tick_mark = float(max(test_values) / precision)
+        tick_txt_width = len(str(precision * tick_mark))
+        for i in range(1, precision + 1):
+            current_tick = int(tick_mark * i)
+            line = form_line(current_tick)
+            lines.append("\n{0}{1}-|{2}".format(current_tick, " " * int(tick_txt_width - len(str(current_tick))), line))
+        histogram = ""
+        for line in reversed(lines):
+            if not line.split("|")[1].isspace():
+                histogram += line
+        space = "\n" + ((" " * tick_txt_width) + (" " * 2))  # Space that y-axis takes up
+        # Print x-axis
+        histogram += space
+        for i in range(0, len(xticks)):
+            histogram += ("-" * int(xtick_len / 2))
+            histogram += "+"
+            histogram += ("-" * int(xtick_len / 2))
+        # Print x-ticks
+        histogram += space
+        for i in range(0, len(xticks)):
+            xtick_padding = " " * int((xtick_len - len(xticks[i])) / 2)
+            histogram += "{0}{1}{0}".format(xtick_padding, xticks[i])
+        return histogram
 
     def print_args(self):
         print("===== ARGS =====")
