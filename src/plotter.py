@@ -26,7 +26,7 @@ class Plotter:
         arg = dict()
         arg['data'] = args.dir if args.dir else args.file
         arg['cols'], arg['sum'], arg['avg'], arg['min'], arg['max'] = args.cols, args.sum, args.avg, args.min, args.max
-        arg['offset'], arg['scale'] = int(args.offset), int(args.scale)
+        arg['offset'], arg['scale'] = int(args.offset), float(args.scale)
         # Set output names. If --indiv is used, ignore --name.
         arg['out_dir'], arg['prefix'] = args.out_dir, "{}_".format(args.prefix) if args.prefix else None
         if arg['data'] is args.dir:

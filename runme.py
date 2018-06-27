@@ -60,7 +60,7 @@ def get_arguments(args):
     parser.add_argument("-M", "--max", help="plot max of comma-separated fields.", action="store_true")
     parser.add_argument("-i", "--indiv", help="generate individual plot for each .csv.", action="store_true")
     parser.add_argument("-o", "--offset", help="vertically shift all lines by integer value.", default=0)
-    parser.add_argument("-S", "--scale", help="multiplies all y-values by this integer value.", default=1)
+    parser.add_argument("-S", "--scale", help="multiplies all y-values by this float value.", default=1)
     parser.add_argument("-D", "--out_dir", help="output directory for plots. Default is \"plots.\"", default="plots")
     parser.add_argument("-p", "--prefix", help="prefix string used for all generated files, e.g. PREFIX_test.html")
     parser.add_argument("-n", "--name", help="filename of generated plot - only works when a single plot is generated, "
