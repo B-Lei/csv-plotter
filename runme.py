@@ -55,44 +55,42 @@ def get_arguments(args):
     """
     parser = argparse.ArgumentParser()
     data = parser.add_mutually_exclusive_group(required=True)
-    data.add_argument("-d", "--dir", help="directory containing .csv files. Accepts Unix-style wildcards.")
-    data.add_argument("-f", "--file", help="comma-separated list of .csv files. Accepts Unix-style wildcards.")
-    parser.add_argument("-c", "--cols", help="comma-separated list of columns to plot for each csv. Use semicolons "
-                                             "to group columns - operations will be performed on each group. EXAMPLE: "
-                                             "\"-c core-[0-9]+;*power -a -m\" will plot 4 lines per csv: min/avg of "
-                                             "all cores, and min/avg of all fields ending with \"power.\" Note that "
-                                             "you can use Unix-style wildcards and regular expressions (precedence "
-                                             "given to Unix-style wildcards).", required=True)
-    parser.add_argument("-s", "--sum", help="plot sum of comma-separated fields.", action="store_true")
-    parser.add_argument("-a", "--avg", help="plot avg of comma-separated fields.", action="store_true")
-    parser.add_argument("-m", "--min", help="plot min of comma-separated fields.", action="store_true")
-    parser.add_argument("-M", "--max", help="plot max of comma-separated fields.", action="store_true")
-    parser.add_argument("-i", "--indiv", help="generate individual plot for each .csv.", action="store_true")
-    parser.add_argument("-o", "--offset", help="shift y-values vertically by integer value.", default=0)
-    parser.add_argument("-S", "--scale", help="multiplies all y-values by this float value.", default=1)
-    parser.add_argument("-D", "--out_dir", help="output directory for plots. Default is \"plots.\"", default="plots")
+    data.add_argument("-d", "--dir", help="directory containing .csv files (accepts Unix-style wildcards)")
+    data.add_argument("-f", "--file", help="comma-separated list of .csv files (accepts Unix-style wildcards)")
+    parser.add_argument("-c", "--cols", help="comma-separated list of columns to plot. Use semicolons to group "
+                                             "columns. Operations will be performed per group. EXAMPLE: "
+                                             "\"-c core-[0-9]+;*power -a -m\" will plot 4 lines per CSV: min/avg of "
+                                             "all \"core\" columns, and min/avg of all \"power\" columns. Unix-style "
+                                             "wildcards and regular expressions are supported (precedence given to "
+                                             "Unix-style wildcards)", required=True)
+    parser.add_argument("-s", "--sum", help="plot sum of comma-separated fields as one line", action="store_true")
+    parser.add_argument("-a", "--avg", help="plot avg of comma-separated fields as one line", action="store_true")
+    parser.add_argument("-m", "--min", help="plot min of comma-separated fields as one line", action="store_true")
+    parser.add_argument("-M", "--max", help="plot max of comma-separated fields as one line", action="store_true")
+    parser.add_argument("-i", "--indiv", help="generate individual plot for each .csv", action="store_true")
+    parser.add_argument("-o", "--offset", help="shift y-values vertically by integer value", default=0)
+    parser.add_argument("-S", "--scale", help="multiplies all y-values by float value", default=1)
+    parser.add_argument("-D", "--out_dir", help="output directory for plots (default is \"plots\")", default="plots")
     parser.add_argument("-p", "--prefix", help="prefix string used for all generated files, e.g. PREFIX_test.html")
-    parser.add_argument("-n", "--name", help="filename of generated plot - only works when a single plot is generated, "
-                                             "i.e. not using --indiv.")
-    parser.add_argument("-t", "--title", help="title of plot.")
-    parser.add_argument("-y", "--y_title", help="title of y-axis.")
-    parser.add_argument("-x", "--x_title", help="title of x-axis.")
-    parser.add_argument("-e", "--extend_disable", help="disable extension of shorter lines.", action="store_true")
-    parser.add_argument("-b", "--autobar", help="display fourth and subsequent lines as bars. Useful when displaying "
-                                                "many lines at once.", action="store_true")
-    parser.add_argument("-B", "--bar", help="Display everything using bars.", action="store_true")
-    parser.add_argument("-u", "--unique_colors", help="use unique colors for each line, even within the same CSV.",
+    parser.add_argument("-n", "--name", help="filename of generated plot (does not work with -i)")
+    parser.add_argument("-t", "--title", help="title of plot")
+    parser.add_argument("-y", "--y_title", help="title of y-axis")
+    parser.add_argument("-x", "--x_title", help="title of x-axis")
+    parser.add_argument("-e", "--extend_disable", help="disable extension of shorter lines", action="store_true")
+    parser.add_argument("-b", "--autobar", help="display fourth and subsequent lines as bars to increase visibility "
+                                                "with many lines", action="store_true")
+    parser.add_argument("-B", "--bar", help="plot using bars instead of lines", action="store_true")
+    parser.add_argument("-u", "--unique_colors", help="use unique colors for each line, even within the same CSV",
                         action="store_true")
-    parser.add_argument("-I", "--image", help="exports as PNG - REQUIRES INTERNET ACCESS. You may also manually export "
-                                              "as PNG using the button in the HTML plot, but legend will be cut off if "
-                                              "there are too many items.", action="store_true")
-    parser.add_argument("--xmin", help="minimum x-value to use in plot.")
-    parser.add_argument("--xmax", help="maximum x-value to use in plot.")
-    parser.add_argument("--ymin", help="minimum y-value to use in plot.")
-    parser.add_argument("--ymax", help="maximum y-value to use in plot.")
-    parser.add_argument("--xaxis", help="col to use as x-axis.")
-    parser.add_argument("--col_eq_val", help="only use rows where 'COL=VAL', e.g. 'name=Bob'. You can chain multiple "
-                                             "conditions with '&', e.g. 'name=Bob&day=Sunday'.")
+    parser.add_argument("-I", "--image", help="export as PNG (requires internet access). You may also manually export "
+                                              "as PNG from the HTML plot, but legend will be cut off if there are too "
+                                              "many lines", action="store_true")
+    parser.add_argument("--xmin", help="minimum x-axis value")
+    parser.add_argument("--xmax", help="maximum x-axis value")
+    parser.add_argument("--ymin", help="minimum y-axis value")
+    parser.add_argument("--ymax", help="maximum y-axis value")
+    parser.add_argument("--xaxis", help="use a column for x-axis values")
+    parser.add_argument("--col_eq_val", help="filter rows where 'COL1=VAL1&COL2=val2...', e.g. 'name=Bob&day=Sunday'")
     return parser.parse_args(args)
 
 
