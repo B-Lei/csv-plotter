@@ -10,12 +10,14 @@ class CSV:
     EXAMPLE USAGE: test_csv.data["core-0"]
     """
     def __init__(self, fname, args):
+        print("Parsing {}...".format(fname))
         self.fname = fname
         self.data = self.parse_csv(fname, args)
         # Get the number of rows for first arbitrary value
         self.numrows = len(next(iter(self.data.values())))
         self.handle_col_ops(args)
         self.apply_modifiers(args)
+        print("Done.\n")
 
     def parse_csv(self, fname, args):
         """
@@ -27,15 +29,16 @@ class CSV:
         if not os.path.exists(fname) or not os.path.isfile(fname):
             print("{} does not exist or is not a file. Aborting.".format(fname))
             sys.exit(0)
-        data = dict()
-        limits = dict()
+        data, limits = dict(), dict()
         with open(fname) as file:
             # Get header. Skip comments and whitespace.
             line_num = 1
             header = [x.strip() for x in file.readline().split(',')]
             while not valid_row(header):
+                # print("[SKIP] Not a header (line {})".format(line_num))
                 header = [x.strip() for x in file.readline().split(',')]
                 line_num += 1
+            print("[HEADER] Header found! (line {})".format(line_num))
             fields_to_use = self.parse_arg_cols_list(args.cols, header)
             if args.xaxis:
                 fields_to_use.append(args.xaxis)
@@ -49,21 +52,25 @@ class CSV:
                         print("You didn't use --col_eq_val correctly. Format must be COL=VAL.")
                         sys.exit(0)
                     col, val = limit.split("=")[0], limit.split("=")[1]
-                    idx = header.index(col)
-                    limits[idx] = val
+                    idx = header.index(col) if col in header else None
+                    if idx is not None:
+                        limits[idx] = val
+                    else:
+                        print("The column specified in --col_eq_val was not in headers. Aborting.")
+                        sys.exit(0)
             # Parse data into dictionary. Only parse columns that were specified.
             for row in file:
                 line_num += 1
                 split = row.split(',')
-                # Skip rows that don't match with header, are blank/comments, or aren't within limits
-                valid = (len(split) == len(header)) and (valid_row(split))
-                if args.col_eq_val:
-                    for i, v in limits.items():
-                        if split[i].strip() != v:
-                            valid = False
-                if not valid:
-                    print("[SKIP] {}: skipping bad row at line {}".format(fname, line_num))
+                # Skip rows that don't match with header, or are blank/comments
+                if (len(split) != len(header)) or (not valid_row(split)):
+                    print("[SKIP] Bad row (line {})".format(line_num))
                     continue
+                # Skip rows that don't meet --col_eq_val condition
+                if args.col_eq_val:
+                    if False in [(split[idx].strip() == val) for idx, val in limits.items()]:
+                        # print("[SKIP] Condition not met (line {})".format(line_num))
+                        continue
                 row_data = [x.strip() for x in split]
                 for num, value in enumerate(row_data):
                     if header[num] in fields_to_use:
@@ -74,7 +81,8 @@ class CSV:
                             modified_value = re.search('[-+]?[0-9]*\.?[0-9]+', value).group(0)
                             # Try applying units (K or M) and convert to float
                             modified_value = self.convert_si(modified_value, value.replace(modified_value, ''))
-                            print("[INTERPRET] Interpreting '{}' as '{}'.".format(value, modified_value,))
+                            print("[NOTE] Interpreting '{}' as '{}' (line {})"
+                                  .format(value, modified_value, line_num))
                             data[header[num]].append(modified_value)
             return data
 

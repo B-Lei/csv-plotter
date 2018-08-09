@@ -12,15 +12,24 @@ def get_csv_list(args):
         for directory in parse_arg_dirfile_list(args.dir):
             for fname in os.listdir(directory):
                 if fname.endswith(".csv"):
-                    csv_list.append(CSV(os.path.join(directory, fname), args))
+                    fpath = os.path.join(directory, fname)
+                    csv = CSV(fpath, args)
+                    if True not in [len(row) > 0 for col, row in csv.data.items()]:
+                        print("{} doesn't contain data. Skipping.".format(fpath))
+                    else:
+                        csv_list.append(csv)
     else:
         for fname in parse_arg_dirfile_list(args.file):
             if fname.endswith(".csv"):
-                csv_list.append(CSV(fname, args))
+                csv = CSV(fname, args)
+                if True not in [len(row) > 0 for col, row in csv.data.items()]:
+                    print("{} doesn't contain data. Skipping.".format(fname))
+                else:
+                    csv_list.append(csv)
     if len(csv_list) == 0:
-        print("CSV list is empty. Are you passing a valid directory with \"-d\" flag, or file with \"-f\" flag?")
-        print("\nAborting.")
-        return
+        print("CSV list is empty. Check that -d/-f are valid, and make sure you aren't filtering everything.")
+        print("Aborting.")
+        sys.exit(0)
     return csv_list
 
 
