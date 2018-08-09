@@ -28,6 +28,7 @@ class CSV:
             print("{} does not exist or is not a file. Aborting.".format(fname))
             sys.exit(0)
         data = dict()
+        limits = dict()
         with open(fname) as file:
             # Get header. Skip comments and whitespace.
             line_num = 1
@@ -42,7 +43,6 @@ class CSV:
                 data[field] = []
             # Get indices of conditional limits. limits[idx] = val
             if args.col_eq_val:
-                limits = dict()
                 for limit in args.col_eq_val.split('&'):
                     lim = limit.split("=")
                     if len(list(filter(None, lim))) != 2:  # Get rid of empty strings
@@ -73,7 +73,7 @@ class CSV:
                         else:
                             modified_value = re.search('[-+]?[0-9]*\.?[0-9]+', value).group(0)
                             # Try applying units (K or M) and convert to float
-                            modified_value = self.convert_SI(modified_value, value.replace(modified_value, ''))
+                            modified_value = self.convert_si(modified_value, value.replace(modified_value, ''))
                             print("[INTERPRET] Interpreting '{}' as '{}'.".format(value, modified_value,))
                             data[header[num]].append(modified_value)
             return data
@@ -93,7 +93,7 @@ class CSV:
             if len(matching_fields) == 0:
                 matching_fields = list(filter(re.compile("^{}$".format(field)).match, search_list))
             if len(matching_fields) == 0:
-                print("\"{}\" not found in CSV headers. Aborting.".format(field))
+                print("\"{}\" not found in CSV headers. Check the first line of the CSV -- aborting.".format(field))
                 sys.exit(0)
             fields_to_use += matching_fields
         # Make sure no duplicate entries, and in order for idempotency
@@ -167,15 +167,15 @@ class CSV:
         return value
 
     @staticmethod
-    def convert_SI(value, unit):
+    def convert_si(value, unit):
         """
         Tries to convert to SI units if applicable
         """
-        SI = {'k':1000, 'm':1000000}
+        si = {'k': 1000, 'm': 1000000}
         unit = unit.lower()
         value = float(value)
-        if unit in SI:
-            value = value * SI[unit]
+        if unit in si:
+            value = value * si[unit]
         return value
 
     @staticmethod

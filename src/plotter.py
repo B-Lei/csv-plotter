@@ -46,8 +46,8 @@ class Plotter:
             arg['title'] = "<b>{}</b><br><span style=\"font-size: 10pt\">{}</span>".format(args.title, default_title)
         else:
             arg['title'] = default_title
-        arg['y_title'] = args.y_title if args.y_title else "Unknown Units"
-        arg['x_title'] = args.x_title if args.x_title else "Time"
+        arg['y_title'] = args.y_title if args.y_title else (arg['cols'] if ';' not in arg['cols'] else "Unknown Units")
+        arg['x_title'] = args.x_title if args.x_title else (args.xaxis if args.xaxis else "Unknown Units")
         # Set broad plot / output information
         arg['img'] = 'png' if args.image else False
         arg['indiv'] = args.indiv
