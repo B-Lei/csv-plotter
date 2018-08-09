@@ -26,7 +26,6 @@ class Plotter:
         arg = dict()
         arg['data'] = args.dir if args.dir else args.file
         arg['cols'], arg['sum'], arg['avg'], arg['min'], arg['max'] = args.cols, args.sum, args.avg, args.min, args.max
-        arg['offset'], arg['scale'] = int(args.offset), float(args.scale)
         # Set output names. If --indiv is used, ignore --name.
         arg['out_dir'], arg['prefix'] = args.out_dir, "{}_".format(args.prefix) if args.prefix else None
         if arg['data'] is args.dir:
@@ -60,9 +59,9 @@ class Plotter:
         arg['xmin'] = int(args.xmin) if args.xmin else (xmin if xmin else self.get_x_min(csv_list, args.xaxis))
         arg['xmax'] = int(args.xmax) if args.xmax else (xmax if xmax else self.get_x_max(csv_list, args.xaxis))
         arg['ymin'] = int(args.ymin) if args.ymin \
-            else (ymin if ymin else arg['scale'] * self.get_y_min(csv_list, args.xaxis) + arg['offset'])
+            else (ymin if ymin else self.get_y_min(csv_list, args.xaxis))
         arg['ymax'] = int(args.ymax) if args.ymax \
-            else (ymax if ymax else arg['scale'] * self.get_y_max(csv_list, args.xaxis) + arg['offset'])
+            else (ymax if ymax else self.get_y_max(csv_list, args.xaxis))
         return arg
 
     def generate_plot(self):
@@ -162,7 +161,7 @@ class Plotter:
         csv and "values" are the current csv and its data values for a field (e.g. "temperature").
         """
         x_vals = csv.data[self.arg['xaxis']] if self.arg['xaxis'] else list(range(0, csv.numrows))
-        y_vals = [self.arg['scale']*y + self.arg['offset'] for y in values]
+        y_vals = values
         # If max number of x-values is 20 or less, also show an ASCII bar graph in console.
         if self.arg['xmax'] <= 20:
             print("\nTrace:", trace_name)
@@ -216,7 +215,7 @@ class Plotter:
         extension_x, extension_y = [], []
         if cur_max_x == self.arg['xmax']:
             return extension_x, extension_y
-        cur_max_y = self.arg['scale'] * values[-1] + self.arg['offset']
+        cur_max_y = values[-1]
         # Range doesn't support floats, so account for first val if float
         if not self.is_integer(cur_max_x) and trace_type is not 'bar':
             extension_x.append(cur_max_x)
@@ -235,7 +234,7 @@ class Plotter:
             title=title,
             xaxis=dict(title=x_title, range=[self.arg['xmin'], self.arg['xmax']], showline=True, showspikes=True),
             yaxis=dict(title=y_title, range=[self.arg['ymin'], self.arg['ymax']], showline=True, showspikes=True),
-            legend=dict(font=dict(size="10"), tracegroupgap=0),
+            legend=dict(font=dict(size=10), tracegroupgap=0),
             showlegend=True,
             hovermode='closest',
         )

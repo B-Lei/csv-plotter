@@ -1,16 +1,16 @@
 # Test comment
 
-    timestamp,hunger
-0,1
-1,1.5
-    2,2
-3,2.5
-4,3
-5,3.5
-    6,4
-7,7
-8,10
-9,20
-10,40
-10.5,80
-11,160,extracol
+    name,timestamp,hunger
+boney,0,1
+boney,1,1.5
+    boney,2,2
+boney,3,2.5
+boney,4,3
+boney,5,3.5
+    buttons,6,4 dogy hunger points
+buttons,7,7 dogy hunger points
+buttons,8,10 dogy hunger points
+buttons,9,20 dogy hunger points
+buttons,10,40 dogy hunger points
+buttons,10.5,0.08K
+buttons,11,160,extracol

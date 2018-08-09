@@ -11,12 +11,13 @@ class CSV:
     """
     def __init__(self, fname, args):
         self.fname = fname
-        self.data = self.parse_csv(fname, args.cols, args.xaxis)
+        self.data = self.parse_csv(fname, args)
         # Get the number of rows for first arbitrary value
         self.numrows = len(next(iter(self.data.values())))
         self.handle_col_ops(args)
+        self.apply_modifiers(args)
 
-    def parse_csv(self, fname, cols, xaxis):
+    def parse_csv(self, fname, args):
         """
         Parses relevant and unique columns into data structure. Does NOT account for column operations.
         EXAMPLE: In "-c core.* --sum," this would store all cols beginning with "core," NOT a single col of their sum.
@@ -34,22 +35,47 @@ class CSV:
             while not valid_row(header):
                 header = [x.strip() for x in file.readline().split(',')]
                 line_num += 1
-            fields_to_use = self.parse_arg_cols_list(cols, header)
-            if xaxis:
-                fields_to_use.append(xaxis)
+            fields_to_use = self.parse_arg_cols_list(args.cols, header)
+            if args.xaxis:
+                fields_to_use.append(args.xaxis)
             for field in fields_to_use:
                 data[field] = []
+            # Get indices of conditional limits. limits[idx] = val
+            if args.col_eq_val:
+                limits = dict()
+                for limit in args.col_eq_val.split('&'):
+                    lim = limit.split("=")
+                    if len(list(filter(None, lim))) != 2:  # Get rid of empty strings
+                        print("You didn't use --col_eq_val correctly. Format must be COL=VAL.")
+                        sys.exit(0)
+                    col, val = limit.split("=")[0], limit.split("=")[1]
+                    idx = header.index(col)
+                    limits[idx] = val
             # Parse data into dictionary. Only parse columns that were specified.
             for row in file:
                 line_num += 1
                 split = row.split(',')
-                if len(split) != len(header) or not valid_row(split):  # Skip rows that don't match with header
-                    print("{}: skipping row at line {}".format(fname, line_num))
+                # Skip rows that don't match with header, are blank/comments, or aren't within limits
+                valid = (len(split) == len(header)) and (valid_row(split))
+                if args.col_eq_val:
+                    for i, v in limits.items():
+                        if split[i].strip() != v:
+                            valid = False
+                if not valid:
+                    print("[SKIP] {}: skipping bad row at line {}".format(fname, line_num))
                     continue
-                row_data = [float(x.strip()) for x in split]
+                row_data = [x.strip() for x in split]
                 for num, value in enumerate(row_data):
                     if header[num] in fields_to_use:
-                        data[header[num]].append(value)
+                        if self.is_float(value):
+                            data[header[num]].append(float(value))
+                        # If the value isn't a float, it probably has units...try to handle intelligently
+                        else:
+                            modified_value = re.search('[-+]?[0-9]*\.?[0-9]+', value).group(0)
+                            # Try applying units (K or M) and convert to float
+                            modified_value = self.convert_SI(modified_value, value.replace(modified_value, ''))
+                            print("[INTERPRET] Interpreting '{}' as '{}'.".format(value, modified_value,))
+                            data[header[num]].append(modified_value)
             return data
 
     @staticmethod
@@ -121,3 +147,41 @@ class CSV:
             if used_individually or key.startswith(("sum", "avg", "min", "max")):
                 filtered_data[key] = value
         self.data = filtered_data
+
+    def apply_modifiers(self, args):
+        """
+        Applies scaling and offset modifications to all values (after col operations)
+        """
+        for colname, values in self.data.items():
+            if colname != args.xaxis:
+                self.data[colname] = [self.modify(args, val) for val in values]
+
+    @staticmethod
+    def modify(args, value):
+        """
+        Applies scaling and offset modifications to a single value
+        """
+        offset, scale = int(args.offset), float(args.scale)
+        value = value * scale if scale else value
+        value = value + offset if offset else value
+        return value
+
+    @staticmethod
+    def convert_SI(value, unit):
+        """
+        Tries to convert to SI units if applicable
+        """
+        SI = {'k':1000, 'm':1000000}
+        unit = unit.lower()
+        value = float(value)
+        if unit in SI:
+            value = value * SI[unit]
+        return value
+
+    @staticmethod
+    def is_float(value):
+        try:
+            float(value)
+            return True
+        except ValueError:
+            return False

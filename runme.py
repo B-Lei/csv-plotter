@@ -59,7 +59,7 @@ def get_arguments(args):
     parser.add_argument("-m", "--min", help="plot min of comma-separated fields.", action="store_true")
     parser.add_argument("-M", "--max", help="plot max of comma-separated fields.", action="store_true")
     parser.add_argument("-i", "--indiv", help="generate individual plot for each .csv.", action="store_true")
-    parser.add_argument("-o", "--offset", help="vertically shift all lines by integer value.", default=0)
+    parser.add_argument("-o", "--offset", help="shift y-values vertically by integer value.", default=0)
     parser.add_argument("-S", "--scale", help="multiplies all y-values by this float value.", default=1)
     parser.add_argument("-D", "--out_dir", help="output directory for plots. Default is \"plots.\"", default="plots")
     parser.add_argument("-p", "--prefix", help="prefix string used for all generated files, e.g. PREFIX_test.html")
@@ -82,6 +82,8 @@ def get_arguments(args):
     parser.add_argument("--ymin", help="minimum y-value to use in plot.")
     parser.add_argument("--ymax", help="maximum y-value to use in plot.")
     parser.add_argument("--xaxis", help="col to use as x-axis.")
+    parser.add_argument("--col_eq_val", help="only use rows where 'COL=VAL', e.g. 'name=Bob'. You can chain multiple "
+                                             "conditions with '&', e.g. 'name=Bob&day=Sunday'.")
     return parser.parse_args(args)
 
 
