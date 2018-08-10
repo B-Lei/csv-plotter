@@ -1,4 +1,5 @@
 import os
+import sys
 import math
 import json
 import random
@@ -76,7 +77,8 @@ class Plotter:
         filename = "{}{}".format(self.arg['prefix'], self.arg['name']) if self.arg['prefix'] else self.arg['name']
         file_path = os.path.join(self.arg['out_dir'], filename)
         if self.arg['img']:
-            logged_in = self.login_to_plotly('config/config.json')
+            proj_dir = sys.path[0].split("/src")[0]
+            logged_in = self.login_to_plotly("{}/config/config.json".format(proj_dir))
             if not logged_in:
                 return
             print("Generating PNG plot...", end='')
