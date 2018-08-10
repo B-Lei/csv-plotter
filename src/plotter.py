@@ -235,7 +235,9 @@ class Plotter:
         return go.Layout(
             title=title,
             xaxis=dict(title=x_title, range=[self.arg['xmin'], self.arg['xmax']], showline=True, showspikes=True),
-            yaxis=dict(title=y_title, range=[self.arg['ymin'], self.arg['ymax']], showline=True, showspikes=True),
+            yaxis=dict(title=y_title,
+                       range=[self.arg['ymin'], self.arg['ymax'] + (0.05 * (self.arg['ymax'] - self.arg['ymin']))],
+                       showline=True, showspikes=True),
             legend=dict(font=dict(size=10), tracegroupgap=0),
             showlegend=True,
             hovermode='closest',
