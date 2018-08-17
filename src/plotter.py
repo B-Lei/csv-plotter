@@ -164,10 +164,10 @@ class Plotter:
         """
         x_vals = csv.data[self.arg['xaxis']] if self.arg['xaxis'] else list(range(0, csv.numrows))
         y_vals = values
-        # If max number of x-values is 20 or less, also show an ASCII bar graph in console.
-        if self.arg['xmax'] <= 20:
+        # If max number of x-values is 15 or less, also show an ASCII bar graph in console.
+        if len(x_vals) <= 15:
             print("\nTrace:", trace_name)
-            print(self.get_histogram(20, y_vals, [str(x) for x in x_vals]))
+            print(self.get_histogram(15, y_vals, [str(x) for x in x_vals]))
         trace_info = dict(
             x=x_vals,
             y=y_vals,
