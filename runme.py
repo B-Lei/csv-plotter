@@ -90,6 +90,7 @@ def get_arguments(args):
     parser.add_argument("--ymin", help="minimum y-axis value")
     parser.add_argument("--ymax", help="maximum y-axis value")
     parser.add_argument("--xaxis", help="use a column for x-axis values")
+    parser.add_argument("--xnorm", help="normalize x-axis to '% completion' for all lines", action="store_true")
     parser.add_argument("--col_eq_val", help="filter rows where 'COL1=VAL1&COL2=val2...', e.g. 'name=Bob&day=Sunday'")
     return parser.parse_args(args)
 

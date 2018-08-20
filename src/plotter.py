@@ -63,6 +63,10 @@ class Plotter:
             else (ymin if ymin else self.get_y_min(csv_list, args.xaxis))
         arg['ymax'] = int(args.ymax) if args.ymax \
             else (ymax if ymax else self.get_y_max(csv_list, args.xaxis))
+        arg['xnorm'] = args.xnorm
+        if arg['xnorm']:
+            arg['xmin'], arg['xmax'] = 0, 100
+            arg['x_title'] = '% completed: {}'.format(arg['x_title'])
         return arg
 
     def generate_plot(self):
@@ -163,11 +167,15 @@ class Plotter:
         csv and "values" are the current csv and its data values for a field (e.g. "temperature").
         """
         x_vals = csv.data[self.arg['xaxis']] if self.arg['xaxis'] else list(range(0, csv.numrows))
+        if self.arg['xnorm']:
+            x_vals[:] = [float(x/x_vals[-1])*100 for x in x_vals]
         y_vals = values
         # If max number of x-values is 15 or less, also show an ASCII bar graph in console.
         if len(x_vals) <= 15:
             print("\nTrace:", trace_name)
-            print(self.get_histogram(15, y_vals, [str(x) for x in x_vals]))
+            # Reformat long floats to single decimal precision
+            # TODO: fix histogram function to format x-ticks properly, still has spacing issues
+            print(self.get_histogram(15, y_vals, [str("{:.1f}".format(float(x))) for x in x_vals]))
         trace_info = dict(
             x=x_vals,
             y=y_vals,
